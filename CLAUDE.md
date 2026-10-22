@@ -440,6 +440,14 @@ confirm_registration  materializa el equipo
 - **`delete_team` no deja el tramite confirmado sin equipo**: borra el alta manual sin pago y
   cancela el resto (una orden pagada no se borra en cascada). Reenviar un tramite confirmado
   (`submit_registration`) es un no-op: antes lo devolvia a `esperando_pago`.
+- **Cancelar pide confirmacion, y una cancelada no acepta pagos.** Caso real: un atleta cancelo
+  con un solo click sin querer y cuatro minutos despues pago y subio el comprobante — la pantalla
+  le seguia mostrando el bloque de pago (habia orden) y `reportar_pago_manual` no miraba el estado.
+  Hoy `CancelarInscripcion` abre un modal, la pantalla de una cancelada no muestra `BloqueDePago`
+  sino "inscribirme de nuevo", y `reportar_pago_manual` rechaza (`20261021100000`). El webhook de
+  una pasarela NO se bloqueo: plata que entro de verdad confirma la inscripcion. **Ni el atleta ni
+  "Marcar como pagada" pueden reactivar una cancelada**: si hace falta, es un arreglo de soporte
+  por el camino del webhook (`registrar_intento_de_pago` con `service_role`).
 - **Cambiar de integrante borra los datos del anterior.** No son suyos.
 - **La talla tiene que ser una de `events.shirt_sizes`.** Sin ese chequeo el organizador termina
   con "L", "l" y "Large".

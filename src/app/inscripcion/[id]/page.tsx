@@ -93,6 +93,7 @@ export default async function InscripcionDetallePage({
           posicionesSinCorreo={posicionesSinCorreo}
           pago={pago}
           readiness={readiness ?? "incompleto"}
+          slugDelEvento={inscripcion.evento.publicSlug}
         />
       </main>
     </>

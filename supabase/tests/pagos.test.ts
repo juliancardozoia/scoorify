@@ -423,3 +423,48 @@ describe("cobrar cierra el círculo", () => {
     }
   });
 });
+
+describe("el comprobante de una transferencia", () => {
+  async function reportar(ordenId: string) {
+    return asUser(s.db, atleta, () =>
+      s.db.query("select id from reportar_pago_manual($1, $2, 'REF-1')", [
+        ordenId,
+        `${registro}/comprobante.png`,
+      ]),
+    );
+  }
+
+  it("el atleta reporta su pago y la orden sigue pendiente", async () => {
+    const orden = await crearOrden();
+    await reportar(orden.id);
+
+    await asUser(s.db, s.users.owner, async () => {
+      const res = await s.db.query<{ status: string }>("select status from orders where id = $1", [
+        orden.id,
+      ]);
+      expect(res.rows[0].status).toBe("pendiente");
+      const intentos = await s.db.query("select id from payment_attempts where order_id = $1", [
+        orden.id,
+      ]);
+      expect(intentos.rows).toHaveLength(1);
+    });
+  });
+
+  it("una inscripción cancelada no acepta un comprobante", async () => {
+    // Caso real: el atleta canceló sin querer y cuatro minutos después pagó.
+    // El reporte entraba sin aviso y nadie podía confirmarlo.
+    const orden = await crearOrden();
+    await asUser(s.db, atleta, () =>
+      s.db.query("select cancel_registration($1)", [registro]),
+    );
+
+    await expect(reportar(orden.id)).rejects.toThrow(/fue cancelada/);
+
+    await asUser(s.db, s.users.owner, async () => {
+      const intentos = await s.db.query("select id from payment_attempts where order_id = $1", [
+        orden.id,
+      ]);
+      expect(intentos.rows).toEqual([]);
+    });
+  });
+});

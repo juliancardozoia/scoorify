@@ -51,6 +51,7 @@ export function ModalDeConfirmacion<TEstado extends EstadoConError>({
   estadoInicial,
   etiquetaConfirmar,
   etiquetaPendiente = "Un momento…",
+  etiquetaCerrar = "Cancelar",
   mensajeDeCarga,
   variante = "destructive",
   ancho = "max-w-md",
@@ -71,6 +72,12 @@ export function ModalDeConfirmacion<TEstado extends EstadoConError>({
   estadoInicial: TEstado;
   etiquetaConfirmar: string;
   etiquetaPendiente?: string;
+  /**
+   * El boton que cierra sin hacer nada. "Cancelar" casi siempre; cuando la
+   * accion misma es CANCELAR algo, "Cancelar" al lado de "Si, cancelar" es
+   * ambiguo justo en el dialogo que existe para evitar un toque equivocado.
+   */
+  etiquetaCerrar?: string;
   mensajeDeCarga?: string;
   variante?: VarianteDeBoton;
   /** Clase de ancho maximo de Tailwind — ver el comentario de `Modal`. */
@@ -110,7 +117,7 @@ export function ModalDeConfirmacion<TEstado extends EstadoConError>({
               disabled={pending}
               className={claseDeBoton({ variante: "secondary", compacto: true })}
             >
-              Cancelar
+              {etiquetaCerrar}
             </button>
             <button
               type="submit"

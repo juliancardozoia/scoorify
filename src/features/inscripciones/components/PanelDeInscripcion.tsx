@@ -1,8 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useState, useTransition } from "react";
 import {
-  cancelarInscripcion,
   enviarInscripcion,
   guardarMisDatos,
   invitarIntegrante,
@@ -28,6 +28,7 @@ import { BotonDeEnvio } from "@/shared/components/BotonDeEnvio";
 import { useCarga } from "@/shared/components/Carga";
 import { useNotificaciones } from "@/shared/components/Notificaciones";
 import { CamposDeAtleta } from "./CamposDeAtleta";
+import { CancelarInscripcion } from "./CancelarInscripcion";
 
 /**
  * El panel del trámite: quién falta, qué falta y el botón de enviar.
@@ -52,6 +53,7 @@ export function PanelDeInscripcion({
   posicionesSinCorreo,
   pago,
   readiness,
+  slugDelEvento,
 }: {
   registro: RegistrationRow;
   integrantes: RegistrationMemberRow[];
@@ -65,6 +67,8 @@ export function PanelDeInscripcion({
   posicionesSinCorreo: number[];
   pago: PagoDeInscripcion;
   readiness: Readiness;
+  /** Para volver a inscribirse cuando este tramite quedo cancelado. */
+  slugDelEvento: string;
 }) {
   const [pendiente, startTransition] = useTransition();
   const { activar, desactivar } = useCarga();
@@ -97,7 +101,27 @@ export function PanelDeInscripcion({
         )}
       </div>
 
-      {(registro.status === "esperando_pago" || pago.orden !== null) && (
+      {/* Cancelada: NO se ofrece pagar. Habia una orden, asi que el bloque de
+          pago se seguia mostrando y un atleta que cancelo sin querer pago y
+          subio el comprobante sin ningun aviso. `reportar_pago_manual` tambien
+          lo rechaza: esto es para que el "no" llegue antes de pagar. */}
+      {registro.status === "cancelada" && (
+        <div className="rounded-2xl border border-red-900/60 bg-red-950/30 p-4 text-sm text-neutral-300">
+          <p className="font-medium text-red-300">Esta inscripción está cancelada.</p>
+          <p className="mt-1">
+            No hagas ningún pago sobre ella. Si quieres participar, inscríbete de nuevo.
+          </p>
+          <Link
+            href={`/eventos/${slugDelEvento}/inscripcion`}
+            className={`${claseDeBoton({ variante: "primary", compacto: true })} mt-3 inline-flex`}
+          >
+            Inscribirme de nuevo
+          </Link>
+        </div>
+      )}
+
+      {registro.status !== "cancelada" &&
+        (registro.status === "esperando_pago" || pago.orden !== null) && (
         <BloqueDePago
           registrationId={registro.id}
           orden={pago.orden}
@@ -233,25 +257,11 @@ export function PanelDeInscripcion({
       )}
 
       {teamSize === 1 && soyCapitan && !cerrada && (
-        <button
-          type="button"
-          disabled={pendiente}
-          onClick={() =>
-            startTransition(async () => {
-              activar("Cancelando la inscripción…");
-              try {
-                const r = await cancelarInscripcion(registro.id);
-                if (r.error) avisarError(r.error);
-                else exito("Inscripción cancelada.");
-              } finally {
-                desactivar();
-              }
-            })
-          }
+        <CancelarInscripcion
+          registrationId={registro.id}
+          hayOrden={pago.orden !== null}
           className="self-start text-sm text-neutral-600 hover:text-red-400"
-        >
-          Cancelar inscripción
-        </button>
+        />
       )}
 
       {teamSize > 1 && soyCapitan && !cerrada && (
@@ -284,25 +294,11 @@ export function PanelDeInscripcion({
             </span>
           )}
 
-          <button
-            type="button"
-            disabled={pendiente}
-            onClick={() =>
-              startTransition(async () => {
-                activar("Cancelando la inscripción…");
-                try {
-                  const r = await cancelarInscripcion(registro.id);
-                  if (r.error) avisarError(r.error);
-                  else exito("Inscripción cancelada.");
-                } finally {
-                  desactivar();
-                }
-              })
-            }
+          <CancelarInscripcion
+            registrationId={registro.id}
+            hayOrden={pago.orden !== null}
             className="ml-auto text-sm text-neutral-600 hover:text-red-400"
-          >
-            Cancelar inscripción
-          </button>
+          />
         </div>
       )}
     </div>
