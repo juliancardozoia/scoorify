@@ -306,8 +306,11 @@ export interface FilaDeInscripcion {
   id: string;
   status: RegistrationRow["status"];
   teamName: string | null;
+  divisionId: string;
   divisionName: string;
   bib: number | null;
+  /** ISO. Para ordenar por "mas recientes" y mostrar cuando entro. */
+  createdAt: string;
   integrantes: Array<{
     nombre: string;
     email: string;
@@ -326,7 +329,7 @@ export async function getInscripcionesDelEvento(eventId: string): Promise<FilaDe
   const [{ data: registros }, { data: divisiones }] = await Promise.all([
     supabase
       .from("registrations")
-      .select("id, status, team_name, division_id, team_id, price_cents, currency")
+      .select("id, status, team_name, division_id, team_id, price_cents, currency, created_at")
       .eq("event_id", eventId)
       .order("created_at"),
     supabase.from("divisions").select("id, name").eq("event_id", eventId),
@@ -353,7 +356,9 @@ export async function getInscripcionesDelEvento(eventId: string): Promise<FilaDe
     id: r.id,
     status: r.status,
     teamName: r.team_name,
+    divisionId: r.division_id,
     divisionName: nombreDivision.get(r.division_id) ?? "",
+    createdAt: r.created_at,
     bib: r.team_id ? (dorsal.get(r.team_id) ?? null) : null,
     priceCents: r.price_cents,
     currency: r.currency,

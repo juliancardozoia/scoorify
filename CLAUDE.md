@@ -1467,6 +1467,28 @@ Se configuran aqui porque es DONDE IMPORTAN, no porque sean del evento.
 ya era nullable con ese significado desde la fase 14; lo unico que faltaba era
 ofrecerlo en la pantalla.
 
+### La pantalla separa el padron de la configuracion
+
+Con ~100 inscriptos, la configuracion (una pantalla entera de formularios)
+quedaba ARRIBA del padron y cada fila mostraba todo abierto —integrantes,
+precio y el formulario de "Marcar como pagada"—: una lista interminable donde
+la tarea diaria (revisar comprobantes) se perdia entre filas que no piden nada.
+
+- **Dos vistas en la URL**: `?vista=inscritos` (por defecto si hay alguna
+  inscripcion) y `?vista=cobro` (por defecto si no hay ninguna). Arriba, cuatro
+  indicadores: inscritas, listas para competir, pagos por revisar y recaudado.
+- **`PadronDeInscripciones`** (cliente, filtrado en el navegador como
+  `GrillaDeAtletas`): buscador, filtro de categoria con conteo, orden, fichas de
+  estado y paginado de a 25. Cada fila es compacta y se despliega de a una para
+  ver integrantes y confirmar el pago.
+- **Un solo estado por fila** (`estadoOperativo`), del que salen la ficha del
+  filtro Y la pastilla: "Pago por revisar" (esperando pago con un intento
+  reportado) se separa de "Falta pagar" porque es lo unico que depende de la
+  organizacion; una confirmada es "Lista para competir" o "Confirmada · faltan
+  datos", nunca las dos señales a la vez.
+- Los conteos de las fichas ignoran el filtro de estado a proposito: si no,
+  elegir una dejaria a todas las demas en cero.
+
 ### Leaderboard y Verificacion son dos cosas
 
 Estaban en una sola pantalla llamada "Resultados" y se entraba buscando la tabla
