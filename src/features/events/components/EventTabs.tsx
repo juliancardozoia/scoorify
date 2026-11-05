@@ -42,8 +42,8 @@ import type { EventFormat } from "@/lib/supabase/types";
  * existiendo; solo se saco la pestaña de esta lista. Volver a mostrarla es
  * agregar la linea de vuelta.
  *
- * Jueces, colaboradores, control, inscripciones, cronograma, leaderboard y
- * verificacion siguen sin pestaña: son ajustes especificos a los que se llega
+ * Jueces, colaboradores, control, inscripciones, cronograma, leaderboard,
+ * puntuacion, verificacion y cargar resultados siguen sin pestaña: son ajustes especificos a los que se llega
  * por la barra lateral, y ofrecer ahi arriba un atajo de vuelta invita a
  * abandonar lo que se estaba configurando. Se esconden solas segun la ruta
  * (`SIN_PESTANAS`) y no por una prop.
@@ -64,6 +64,10 @@ const SIN_PESTANAS = [
   "/leaderboard",
   "/puntuacion",
   "/verificacion",
+  // "Cargar resultados" (solo CrossFit): se llega por la barra lateral desde
+  // que "Cargar" salio de esta barra, y es trabajo del dia del evento, no
+  // configuracion.
+  "/scores",
 ];
 
 function secciones(esHibrida: boolean): Seccion[] {

@@ -736,7 +736,7 @@ afuera y las pantallas de configuracion adentro, la regla se simplifico a una so
 **Divisiones, Circuito, Atletas y Penalizaciones salieron de `SIN_PESTANAS`** (`EventTabs.tsx`): ya
 no son pantallas "solo barra lateral", tienen su pestaña como el resto. Lo que sigue en
 `SIN_PESTANAS` —jueces, colaboradores, control, inscripciones, cronograma, leaderboard,
-verificacion— son ajustes especificos a los que se llega solo por la barra lateral.
+puntuacion, verificacion y scores (Cargar resultados)— son ajustes especificos a los que se llega solo por la barra lateral.
 
 ### Se puede borrar un circuito completo, si nada lo usa
 
