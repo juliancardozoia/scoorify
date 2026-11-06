@@ -29,6 +29,23 @@ export function horaEnEvento(iso: string, timezone: string): string {
   });
 }
 
+/**
+ * Dia de la semana y hora, sin segundos: "sáb 08:00". Para ubicar un heat del
+ * cronograma en una lista corta (la del juez). El dia va porque una
+ * competencia de dos dias tiene un "08:00" cada dia.
+ */
+export function diaYHoraEnEvento(iso: string, timezone: string): string {
+  const fecha = new Date(iso);
+  const dia = fecha.toLocaleDateString("es", { timeZone: timezone, weekday: "short" });
+  const hora = fecha.toLocaleTimeString("es", {
+    timeZone: timezone,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+  return `${dia.replace(/\.$/, "")} ${hora}`;
+}
+
 /** Fecha y hora corta. Para largadas programadas y publicaciones. */
 export function fechaHoraEnEvento(iso: string, timezone: string): string {
   return new Date(iso).toLocaleString("es", {

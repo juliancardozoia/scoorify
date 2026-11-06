@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { supabaseConfigured } from "@/lib/supabase/env";
 import type { LaneStatus } from "@/lib/supabase/types";
+import { ordenarSegunCronograma } from "./lib/ordenDeCarriles";
 
 /**
  * Si el boton "Juzgar" debe verse.
@@ -34,7 +35,15 @@ export interface JudgeLane {
   heatName: string;
   /** La prueba que corre este carril. Con una sola en el evento no se muestra. */
   workoutName: string;
+  /** `workouts.order_index`: desempata dos heats a la misma hora. */
+  workoutOrder: number | null;
   heatStartedAt: string | null;
+  /** Hora programada en el cronograma. Null si el heat todavia no tiene hora. */
+  heatScheduledAt: string | null;
+  /** El escenario donde corre el heat. Vacio si el evento no usa arenas. */
+  arenaName: string;
+  /** Huso del evento: la hora se muestra en hora de pared de la competencia. */
+  eventTimezone: string;
   eventId: string;
   eventName: string;
   judgeId: string | null;
@@ -61,6 +70,7 @@ interface Row {
   event_id: string;
   event_name: string | null;
   event_status: string | null;
+  event_timezone: string | null;
   team_id: string | null;
   bib_number: number | null;
   team_name: string | null;
@@ -69,7 +79,10 @@ interface Row {
   heat_id: string;
   heat_name: string;
   heat_started_at: string | null;
+  heat_scheduled_at: string | null;
+  arena_name: string | null;
   workout_name: string | null;
+  workout_order: number | null;
 }
 
 function mapear(row: Row, userId: string): JudgeLane {
@@ -83,7 +96,11 @@ function mapear(row: Row, userId: string): JudgeLane {
     heatId: row.heat_id,
     heatName: row.heat_name,
     workoutName: row.workout_name ?? "",
+    workoutOrder: row.workout_order,
     heatStartedAt: row.heat_started_at,
+    heatScheduledAt: row.heat_scheduled_at,
+    arenaName: row.arena_name ?? "",
+    eventTimezone: row.event_timezone ?? "America/Bogota",
     eventId: row.event_id,
     eventName: row.event_name ?? "",
     judgeId: row.judge_id,
@@ -113,35 +130,6 @@ export interface LanesResult {
     | "sin-carriles"
     | "carriles-sin-atleta"
     | "todos-tomados";
-}
-
-/**
- * El numero de heat, para ordenar numericamente y no alfabeticamente.
- *
- * `heats.name` es texto libre ("Heat 1", "Heat 2", ..., "Heat 10"): ordenado
- * como string, "Heat 10" cae entre "Heat 1" y "Heat 2". Sin numero se manda al
- * final, no al principio -- un heat sin numero en el nombre no es "el
- * primero".
- */
-function numeroDeHeat(nombre: string): number {
-  const m = nombre.match(/(\d+)/);
-  return m ? Number(m[1]) : Number.POSITIVE_INFINITY;
-}
-
-/**
- * Por evento y despues por heat. Es lo que hace que un juez que se sale de la
- * app y vuelve se ubique de un vistazo: el orden en el que se lista es el
- * orden en el que corre la competencia, no el orden en el que
- * `judge_visible_lanes()` los devolvio (por `lane_number` dentro de cada
- * heat, sin agrupar por heat ni por evento).
- */
-function ordenarPorEventoYHeat(lanes: JudgeLane[]): JudgeLane[] {
-  return [...lanes].sort(
-    (a, b) =>
-      a.eventName.localeCompare(b.eventName) ||
-      numeroDeHeat(a.heatName) - numeroDeHeat(b.heatName) ||
-      a.laneNumber - b.laneNumber,
-  );
 }
 
 export async function getJudgeLanes(): Promise<LanesResult> {
@@ -175,8 +163,8 @@ export async function getJudgeLanes(): Promise<LanesResult> {
   const conAtleta = enJuego.filter((r) => r.team_id !== null);
   const todos = conAtleta.map((r) => mapear(r, user.id));
 
-  const mios = ordenarPorEventoYHeat(todos.filter((l) => l.judgeId === user.id));
-  const libres = ordenarPorEventoYHeat(todos.filter((l) => l.judgeId === null));
+  const mios = ordenarSegunCronograma(todos.filter((l) => l.judgeId === user.id));
+  const libres = ordenarSegunCronograma(todos.filter((l) => l.judgeId === null));
 
   let motivo: LanesResult["motivo"] = null;
   if (mios.length === 0 && libres.length === 0) {

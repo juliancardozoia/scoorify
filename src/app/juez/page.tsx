@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { claimLane } from "@/features/judge/actions";
 import { getJudgeLanes, puedeJuzgar, type JudgeLane, type LanesResult } from "@/features/judge/queries";
 import { ClaimButton } from "@/features/judge/components/ClaimButton";
+import { diaYHoraEnEvento } from "@/shared/utils/fecha";
 
 export const metadata = { title: "Carriles — Scoorify" };
 
@@ -184,6 +185,25 @@ function LaneInfo({ lane }: { lane: JudgeLane }) {
         </p>
       </div>
       <p className="text-right text-xs text-neutral-500">
+        {/* La HORA y la ARENA arriba de todo: la lista sigue el cronograma, y
+            "a que hora y a donde camino" es lo que el juez busca. Con varias
+            pruebas y categorias hay varios "Heat 1"; la hora es lo que los
+            distingue de un vistazo. */}
+        {(lane.heatScheduledAt || lane.arenaName) && (
+          <>
+            <span className="font-semibold text-neutral-100">
+              {[
+                lane.heatScheduledAt
+                  ? diaYHoraEnEvento(lane.heatScheduledAt, lane.eventTimezone)
+                  : null,
+                lane.arenaName || null,
+              ]
+                .filter(Boolean)
+                .join(" · ")}
+            </span>
+            <br />
+          </>
+        )}
         {/* La PRUEBA primero: con tres WODs en la competencia, "Heat 2" no
             alcanza para saber cual de los tres es este, y esa es la primera
             pregunta del dia. Con una sola prueba el nombre no aporta y no se
