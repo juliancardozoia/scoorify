@@ -87,13 +87,16 @@ export function SelectorDeCompetencias({
   }
 
   return (
-    <div ref={caja} className="relative min-w-0">
+    // `flex-1` + `max-w-full`: en celular el nombre ocupa lo que dejan la
+    // hamburguesa y el avatar, y se trunca ahi. Con un ancho fijo se salia
+    // de su lugar y quedaba debajo del selector de idioma.
+    <div ref={caja} className="relative min-w-0 flex-1">
       <button
         type="button"
         onClick={() => (abierto ? setAbierto(false) : abrir())}
         aria-expanded={abierto}
         aria-haspopup="listbox"
-        className="flex min-w-0 max-w-[10rem] items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-semibold transition-colors hover:bg-neutral-900 sm:max-w-[18rem]"
+        className="flex min-w-0 max-w-full items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-semibold transition-colors hover:bg-neutral-900 sm:max-w-[18rem]"
       >
         <span className="min-w-0 flex-1 truncate text-left">
           {actual ? actual.name : "Competencias"}

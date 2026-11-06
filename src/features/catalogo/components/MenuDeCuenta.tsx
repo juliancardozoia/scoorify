@@ -73,19 +73,22 @@ export function MenuDeCuenta({
           sesion sin tener que abrir nada, y en la mayoria de las cuentas
           —sin nombre cargado— era lo unico distinto que igual se veia
           adentro del menu. `max-w` + `truncate` porque un correo corporativo
-          largo no puede empujar el selector de idioma que esta al lado. */}
+          largo no puede empujar el selector de idioma que esta al lado.
+          En celular se esconde y queda solo el avatar: el encabezado del
+          panel tambien lleva la hamburguesa y el selector de competencias, y
+          con el correo no entraba — los tres se pisaban. */}
       <button
         type="button"
         onClick={() => setAbierto((a) => !a)}
         aria-expanded={abierto}
         aria-haspopup="menu"
         aria-label={`${textos.mi}: ${email}`}
-        className="flex max-w-[10rem] items-center gap-2 rounded-xl border border-neutral-700 py-1.5 pr-2.5 pl-1.5 text-sm font-medium transition-colors hover:border-neutral-600 hover:bg-neutral-900 sm:max-w-[14rem]"
+        className="flex shrink-0 items-center gap-2 rounded-xl border border-neutral-700 py-1.5 pr-2.5 pl-1.5 text-sm font-medium transition-colors hover:border-neutral-600 hover:bg-neutral-900 sm:max-w-[14rem]"
       >
         <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-lime-400 text-sm font-bold text-lime-950">
           {inicial}
         </span>
-        <span className="min-w-0 flex-1 truncate text-left">{email}</span>
+        <span className="hidden min-w-0 flex-1 truncate text-left sm:block">{email}</span>
         <Icono
           nombre="flecha"
           className={`h-3 w-3 shrink-0 text-neutral-500 transition-transform ${abierto ? "-rotate-90" : "rotate-90"}`}

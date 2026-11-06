@@ -237,6 +237,16 @@ export function MenuLateral({
 
       <div className="mt-auto border-t border-neutral-800 pt-3">
         <Grupo enlaces={PIE} pathname={pathname} alElegir={cerrar} />
+        {/* Solo en celular (el cajon): ahi el encabezado no tiene lugar para
+            el idioma. En la barra fija de escritorio no se pinta, porque el
+            encabezado ya lo muestra. */}
+        <div className="mt-3 px-3 sm:hidden">
+          <SelectorDeIdioma
+            actual={idioma}
+            elegir={elegirIdioma}
+            etiqueta={etiquetaIdioma}
+          />
+        </div>
       </div>
     </div>
   );
@@ -283,12 +293,15 @@ export function MenuLateral({
           actualId={competenciaActual ?? undefined}
         />
 
-        <div className="ml-auto flex items-center gap-2 sm:gap-3">
-          <SelectorDeIdioma
-            actual={idioma}
-            elegir={elegirIdioma}
-            etiqueta={etiquetaIdioma}
-          />
+        <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
+          {/* En celular no entra en el encabezado: vive en el cajon. */}
+          <div className="hidden sm:block">
+            <SelectorDeIdioma
+              actual={idioma}
+              elegir={elegirIdioma}
+              etiqueta={etiquetaIdioma}
+            />
+          </div>
           <MenuDeCuenta
             email={email}
             nombre={nombre || null}
