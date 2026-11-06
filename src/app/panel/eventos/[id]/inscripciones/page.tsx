@@ -13,12 +13,13 @@ export const dynamic = "force-dynamic";
 
 type Vista = "inscritos" | "cobro";
 
-function dinero(cents: number, moneda: string): string {
-  return new Intl.NumberFormat("es", {
-    style: "currency",
-    currency: moneda,
-    maximumFractionDigits: 0,
-  }).format(cents / 100);
+/**
+ * El monto SIN la moneda: el codigo ("COP") va aparte, mas chico, en el
+ * indicador. Formateado entero —"12.750.000 COP" en text-2xl— no entraba en
+ * una tarjeta de media pantalla en celular y se salia por el borde.
+ */
+function monto(cents: number): string {
+  return new Intl.NumberFormat("es", { maximumFractionDigits: 0 }).format(cents / 100);
 }
 
 /**
@@ -131,7 +132,8 @@ export default async function InscripcionesPage({
           {recaudado > 0 ? (
             <Indicador
               titulo="Recaudado"
-              valor={dinero(recaudado, moneda)}
+              valor={monto(recaudado)}
+              unidad={moneda}
               nota={`${pagadas.length} pagos confirmados`}
             />
           ) : (
@@ -175,11 +177,14 @@ function Indicador({
   valor,
   nota,
   tono,
+  unidad,
 }: {
   titulo: string;
   valor: number | string;
   nota: string;
   tono?: "lima" | "ambar";
+  /** Moneda u otra unidad: va al lado del valor, chica, y baja de linea si no entra. */
+  unidad?: string;
 }) {
   const borde =
     tono === "ambar"
@@ -190,9 +195,18 @@ function Indicador({
   const color = tono === "ambar" ? "text-amber-300" : tono === "lima" ? "text-lime-300" : "";
 
   return (
-    <div className={`flex flex-col gap-1 rounded-2xl border p-4 ${borde}`}>
+    // `min-w-0`: sin el, un valor largo estira la celda del grid en vez de
+    // ajustarse a ella.
+    <div className={`flex min-w-0 flex-col gap-1 rounded-2xl border p-4 ${borde}`}>
       <dt className="text-xs font-medium text-neutral-500 uppercase">{titulo}</dt>
-      <dd className={`text-2xl font-semibold tabular-nums ${color}`}>{valor}</dd>
+      <dd
+        className={`flex flex-wrap items-baseline gap-x-1.5 font-semibold tabular-nums ${color} ${
+          unidad ? "text-xl sm:text-2xl" : "text-2xl"
+        }`}
+      >
+        <span className="min-w-0 break-all">{valor}</span>
+        {unidad && <span className="text-xs font-medium text-neutral-500">{unidad}</span>}
+      </dd>
       <dd className="text-xs text-neutral-500">{nota}</dd>
     </div>
   );
