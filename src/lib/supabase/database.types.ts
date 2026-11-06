@@ -3373,6 +3373,20 @@ export type Database = {
         Returns: undefined
       }
       medios_de_pago: { Args: { p_registration_id: string }; Returns: Json }
+      mis_heats: {
+        Args: { p_registration_id: string }
+        Returns: {
+          arena_name: string
+          ended_at: string
+          heat_name: string
+          lane_number: number
+          scheduled_at: string
+          scheduled_end_at: string
+          started_at: string
+          workout_name: string
+          workout_order: number
+        }[]
+      }
       org_staff_directory: {
         Args: { p_event_id: string }
         Returns: {
@@ -3440,6 +3454,7 @@ export type Database = {
         Args: { p_public_slug: string }
         Returns: string
       }
+      public_heat_lineups: { Args: { p_public_slug: string }; Returns: Json }
       public_leaderboard: {
         Args: { p_public_slug: string }
         Returns: {

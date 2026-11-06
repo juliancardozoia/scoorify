@@ -8,7 +8,8 @@ import { rangoDeFechas, diasHasta } from "@/features/catalogo/lib/formato";
 import type { Idioma } from "@/shared/i18n/idiomas";
 import { claseDePastilla, textoDeEstado, mensajeDeReadiness } from "../lib/estados";
 import { ordenarParaElListado, yaPaso } from "../lib/panorama";
-import type { ResumenDeInscripcion } from "../queries";
+import type { MiHeat, ResumenDeInscripcion } from "../queries";
+import { MisHeats } from "./MisHeats";
 
 /**
  * El panorama del atleta: mismo concepto que `PanoramaDeCompetencia` (el del
@@ -28,6 +29,7 @@ export function PanoramaDeAtleta({
   destacada,
   resultado,
   leaderboardCircuito,
+  misHeats,
   idioma,
 }: {
   inscripciones: ResumenDeInscripcion[];
@@ -36,6 +38,11 @@ export function PanoramaDeAtleta({
   resultado: ResultadoDeAtleta;
   /** Solo si `destacada.eventFormat === "circuito"` y hay resultados. */
   leaderboardCircuito: Leaderboard | null;
+  /**
+   * Los heats de `destacada`. `null` mientras no tenga equipo (sin confirmar
+   * no hay heat posible, y decir "todavia no tienes heat" confundiria).
+   */
+  misHeats: MiHeat[] | null;
   idioma: Idioma;
 }) {
   if (!destacada) {
@@ -53,6 +60,15 @@ export function PanoramaDeAtleta({
   return (
     <div className="flex flex-col gap-6">
       <WidgetDestacada destacada={destacada} idioma={idioma} />
+
+      {misHeats && (
+        <MisHeats
+          heats={misHeats}
+          timezone={destacada.timezone}
+          idioma={idioma}
+          eventSlug={destacada.eventSlug}
+        />
+      )}
 
       {puedeTenerResultados &&
         (resultado?.format === "circuito" && leaderboardCircuito ? (

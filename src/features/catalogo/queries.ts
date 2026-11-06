@@ -304,3 +304,30 @@ export async function getInscritos(slug: string): Promise<Inscritos | null> {
   if (error || !data) return null;
   return data as unknown as Inscritos;
 }
+
+export interface AtletaDeHeat {
+  carril: number;
+  dorsal: number | null;
+  /** Nombre del equipo; null en individuales (se muestra el del integrante). */
+  equipo: string | null;
+  integrantes: Array<{ nombre: string; pais: string | null }>;
+}
+
+export interface HeatConAtletas extends HeatPublico {
+  athletes: AtletaDeHeat[];
+}
+
+/**
+ * Los heats del cronograma CON quien corre en cada carril: la hoja de heats.
+ *
+ * Va aparte de `getEventoPublico` a proposito: aquella la usan las cuatro
+ * pestañas de la ficha, y la lista de atletas de cada heat solo la necesita
+ * Cronograma. Mismo filtro y mismo orden que `schedule`
+ * (`public_heat_lineups`, 20261106100000).
+ */
+export async function getHeatsConAtletas(slug: string): Promise<HeatConAtletas[]> {
+  const supabase = createPublicClient();
+  const { data, error } = await supabase.rpc("public_heat_lineups", { p_public_slug: slug });
+  if (error || !data) return [];
+  return data as unknown as HeatConAtletas[];
+}

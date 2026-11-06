@@ -21,6 +21,7 @@ import { PanoramaDeAtleta } from "@/features/inscripciones/components/PanoramaDe
 import {
   getInscripcionesDelEvento,
   getMisInscripciones,
+  getMisHeats,
 } from "@/features/inscripciones/queries";
 import { elegirDestacada } from "@/features/inscripciones/lib/panorama";
 import { getPerfil } from "@/features/cuenta/queries";
@@ -164,6 +165,10 @@ async function PanelDeCuenta() {
 
   const destacada = elegirDestacada(inscripciones);
 
+  // Heat, carril, hora y arena de la destacada. Solo con equipo: sin
+  // confirmar no hay heat posible.
+  const misHeats = destacada && destacada.bib !== null ? await getMisHeats(destacada.id) : null;
+
   // Cliente CON SESION, no el anonimo: el propio inscripto ve su resultado y
   // el de su categoria aunque el evento todavia no sea publico ni el plan
   // muestre nada en vivo -- el bypass vive en Postgres
@@ -217,6 +222,7 @@ async function PanelDeCuenta() {
         destacada={destacada}
         resultado={resultado}
         leaderboardCircuito={leaderboardCircuito}
+        misHeats={misHeats}
         idioma={idioma}
       />
 

@@ -1875,6 +1875,32 @@ que ya ocurrio no ubican a nadie: son un archivo, y le sacan el lugar a los
 resultados, que es lo que se busca despues. Con un dia de gracia, para que una
 competencia que corre hoy siga mostrandolo hasta que termine el dia.
 
+### El atleta ve SU heat, y el cronograma dice quien corre en cada uno
+
+Hasta `20261106100000` el cronograma publico listaba heats por dia, arena y
+categoria, pero nadie podia saber en cual le tocaba: ninguna pantalla del
+atleta leia `heats`/`lanes` (son tablas de STAFF, `puede_leer_evento()`). Una
+atleta de una categoria con tres heats veia tres horarios y ninguna forma de
+elegir.
+
+- **`mis_heats(registration_id)`** (solo `authenticated`) devuelve heat,
+  carril, hora y arena del equipo de ESA inscripcion, y solo si quien pregunta
+  es INTEGRANTE — misma regla que `getMisInscripciones`, nunca `created_by`.
+  Incluye los heats sin hora: "tienes heat, horario por confirmar" tambien es
+  informacion. Lo pinta `MisHeats` en el panorama del atleta, solo para la
+  destacada y solo con equipo (sin dorsal no hay heat posible).
+- **`public_heat_lineups(slug)`** es la hoja de heats: los mismos heats que
+  `schedule` (mismo filtro, mismo orden) con carril, dorsal, nombre y pais.
+  Expone lo mismo que `public_participants` mas el carril. **Va aparte de
+  `public_event_detail` a proposito**: aquella la cargan las cuatro pestañas y
+  la lista de atletas solo la usa Cronograma. Si falla, la pestaña muestra el
+  cronograma igual, sin desplegables.
+- **Cada heat es un `<details>` nativo** y arriba hay un buscador: con
+  cincuenta heats encontrarse abriendolos de a uno no sirve. Un numero busca el
+  dorsal EXACTO ("12" no trae al 112); el texto ignora tildes.
+- **El "proximo" heat de `MisHeats` es el primero que no termino**, no se
+  calcula contra el reloj: un heat demorado sigue siendo el proximo.
+
 **`public_participants` no expone correo, telefono, nacimiento ni estado de
 pago.** Solo nombre, dorsal y categoria: es la lista que cualquier competencia
 pega en la pared, y el leaderboard ya mostraba los nombres apenas arranca.

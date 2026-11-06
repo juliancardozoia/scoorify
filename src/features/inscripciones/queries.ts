@@ -373,3 +373,43 @@ export async function getInscripcionesDelEvento(eventId: string): Promise<FilaDe
       })),
   }));
 }
+
+export interface MiHeat {
+  workout: string | null;
+  heat: string;
+  carril: number;
+  /** ISO. null mientras la organizacion no lo programe. */
+  scheduledAt: string | null;
+  scheduledEndAt: string | null;
+  arena: string | null;
+  startedAt: string | null;
+  endedAt: string | null;
+}
+
+/**
+ * Los heats del equipo de UNA inscripcion: en que heat, carril, hora y arena
+ * le toca a cada prueba.
+ *
+ * Sale de `mis_heats()` (security definer) y no de `heats`/`lanes`: esas
+ * tablas solo las lee el staff, y abrirlas por RLS para el atleta le dejaria
+ * ver los carriles de toda la competencia. La funcion ya exige que quien
+ * pregunta sea INTEGRANTE del tramite.
+ */
+export async function getMisHeats(registrationId: string): Promise<MiHeat[] | null> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("mis_heats", { p_registration_id: registrationId });
+  // null y no []: un error (o la app desplegada antes que la migracion) no
+  // puede pintar "todavia no tienes heat asignado", que seria falso. Sin
+  // dato, el widget simplemente no aparece.
+  if (error || !data) return null;
+  return data.map((h) => ({
+    workout: h.workout_name,
+    heat: h.heat_name,
+    carril: h.lane_number,
+    scheduledAt: h.scheduled_at,
+    scheduledEndAt: h.scheduled_end_at,
+    arena: h.arena_name,
+    startedAt: h.started_at,
+    endedAt: h.ended_at,
+  }));
+}
